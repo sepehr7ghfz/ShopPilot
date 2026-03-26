@@ -625,20 +625,20 @@ body {
 }
 
 .message-user {
-  border-right: 4px solid var(--accent);
+  border-right: 4px solid #2f9e44;
   border-left: 1px solid var(--border);
 }
 
 .message-assistant {
-  border-left: 4px solid #7a90a7;
+  border-left: 4px solid #2a6fb6;
 }
 
 [data-theme="dark"] .message-assistant {
-  border-left-color: #54708d;
+  border-left-color: #4d89c8;
 }
 
 .message-welcome {
-  border-left-color: var(--accent);
+  border-left-color: #2a6fb6;
 }
 
 .message-error {
