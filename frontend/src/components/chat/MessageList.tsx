@@ -1,4 +1,4 @@
-import { DragEvent } from "react";
+import { DragEvent, useEffect, useRef } from "react";
 
 import { ProductGrid } from "@/components/product/ProductGrid";
 import { ChatMessage } from "@/lib/types";
@@ -9,7 +9,17 @@ interface MessageListProps {
 }
 
 export function MessageList({ messages, onImageDropped }: MessageListProps): JSX.Element {
+  const listRef = useRef<HTMLDivElement | null>(null);
   const hasOnlyWelcome = messages.length === 1 && messages[0]?.id === "assistant-welcome";
+
+  useEffect(() => {
+    const listEl = listRef.current;
+    if (!listEl) {
+      return;
+    }
+
+    listEl.scrollTop = listEl.scrollHeight;
+  }, [messages]);
 
   const handleDrop = (event: DragEvent<HTMLDivElement>): void => {
     event.preventDefault();
@@ -22,7 +32,7 @@ export function MessageList({ messages, onImageDropped }: MessageListProps): JSX
   };
 
   return (
-    <div className="message-list" aria-live="polite" onDrop={handleDrop} onDragOver={handleDragOver}>
+    <div ref={listRef} className="message-list" aria-live="polite" onDrop={handleDrop} onDragOver={handleDragOver}>
       {hasOnlyWelcome ? (
         <section className="message-list-empty-state" aria-label="Welcome help">
           <h3>Ready when you are</h3>

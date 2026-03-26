@@ -19,6 +19,7 @@ const initialAssistantMessage: ChatMessage = {
 export function ChatContainer(): JSX.Element {
   const [messages, setMessages] = useState<ChatMessage[]>([initialAssistantMessage]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isAssistantTyping, setIsAssistantTyping] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showStarters, setShowStarters] = useState(true);
   const [theme, setTheme] = useState<"light" | "dark">("light");
@@ -47,6 +48,66 @@ export function ChatContainer(): JSX.Element {
     document.documentElement.setAttribute("data-theme", theme);
     window.localStorage.setItem("shoppilot-theme", theme);
   }, [theme]);
+
+  const sleep = (ms: number): Promise<void> =>
+    new Promise((resolve) => {
+      window.setTimeout(resolve, ms);
+    });
+
+  const typeAssistantMessage = async (
+    messageId: string,
+    fullText: string,
+    intent: ChatMessage["intent"],
+    products: ChatMessage["products"]
+  ): Promise<void> => {
+    const length = fullText.length;
+    const step = length > 260 ? 2 : 1;
+
+    const getDelayMs = (char: string): number => {
+      if (char === "." || char === "!" || char === "?") {
+        return 72;
+      }
+      if (char === "," || char === ";" || char === ":") {
+        return 46;
+      }
+      if (char === "\n") {
+        return 58;
+      }
+      return 20;
+    };
+
+    setIsAssistantTyping(true);
+    for (let index = step; index <= length; index += step) {
+      const nextText = fullText.slice(0, index);
+      setMessages((prev) =>
+        prev.map((message) =>
+          message.id === messageId
+            ? {
+                ...message,
+                text: nextText,
+              }
+            : message
+        )
+      );
+
+      const lastChar = fullText.charAt(index - 1);
+      await sleep(getDelayMs(lastChar));
+    }
+
+    setMessages((prev) =>
+      prev.map((message) =>
+        message.id === messageId
+          ? {
+              ...message,
+              text: fullText,
+              intent,
+              products,
+            }
+          : message
+      )
+    );
+    setIsAssistantTyping(false);
+  };
 
   const handleSend = async (payload: {
     message?: string;
@@ -79,12 +140,19 @@ export function ChatContainer(): JSX.Element {
       const assistantMessage: ChatMessage = {
         id: generateClientId("assistant"),
         role: "assistant",
-        text: assistantResponse.response_text,
+        text: "",
         intent: assistantResponse.intent,
-        products: assistantResponse.products,
+        products: [],
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
+      setIsLoading(false);
+      await typeAssistantMessage(
+        assistantMessage.id,
+        assistantResponse.response_text,
+        assistantResponse.intent,
+        assistantResponse.products
+      );
       console.log("[frontend.chat] handleSend:assistant_received", {
         intent: assistantResponse.intent,
         products: assistantResponse.products?.length ?? 0,
@@ -185,14 +253,14 @@ export function ChatContainer(): JSX.Element {
           <MessageList messages={messages} onImageDropped={setSelectedFile} />
 
           <footer className="chat-footer">
-            {isLoading ? (
+            {isLoading || isAssistantTyping ? (
               <div className="loading-inline">
                 <LoadingSpinner />
-                <span>Thinking...</span>
+                <span>{isLoading ? "Thinking..." : "Typing..."}</span>
               </div>
             ) : null}
             <MessageInput
-              isLoading={isLoading}
+              isLoading={isLoading || isAssistantTyping}
               selectedFile={selectedFile}
               onFileSelected={setSelectedFile}
               onSubmit={handleSend}

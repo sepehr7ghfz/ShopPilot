@@ -34,33 +34,38 @@ export function MessageInput({
     };
   }, [previewUrl]);
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
-    event.preventDefault();
-
+  const submitMessage = async (): Promise<void> => {
     const trimmedMessage = message.trim();
     if (!trimmedMessage && !selectedFile) {
       return;
     }
 
-    const draftMessage = message;
+    await onSubmit({
+      message: trimmedMessage || undefined,
+      imageFile: selectedFile,
+    });
+
     setMessage("");
     onFileSelected(null);
+  };
 
-    try {
-      await onSubmit({
-        message: trimmedMessage || undefined,
-        imageFile: selectedFile,
-      });
-    } catch {
-      setMessage(draftMessage);
-      onFileSelected(selectedFile);
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
+    event.preventDefault();
+    if (isLoading) {
+      return;
     }
+
+    await submitMessage();
   };
 
   const handleTextAreaKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>): void => {
+    if (isLoading) {
+      return;
+    }
+
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
-      event.currentTarget.form?.requestSubmit();
+      void submitMessage();
     }
   };
 
