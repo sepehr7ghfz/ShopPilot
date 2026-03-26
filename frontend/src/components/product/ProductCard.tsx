@@ -32,7 +32,10 @@ export function ProductCard({ product }: ProductCardProps): JSX.Element {
       </div>
       {product.reason ? (
         <footer className="product-card-footer">
-          <p className="product-card-reason">Why this match: {product.reason}</p>
+          <details className="product-card-reason-details">
+            <summary>Why this match</summary>
+            <p className="product-card-reason">{product.reason}</p>
+          </details>
         </footer>
       ) : null}
     </article>

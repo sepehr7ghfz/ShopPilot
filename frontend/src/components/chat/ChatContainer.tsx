@@ -234,8 +234,8 @@ export function ChatContainer(): JSX.Element {
             </button>
             {showStarters ? (
               <ul>
-                <li>"Recommend a black hoodie for casual wear"</li>
-                <li>"I need a travel backpack"</li>
+                <li>"Recommend sneakers for daily wear"</li>
+                <li>"Show me watches under $65"</li>
                 <li>Upload a product photo and add "find similar but cheaper"</li>
               </ul>
             ) : null}
