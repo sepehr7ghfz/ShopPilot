@@ -229,13 +229,25 @@ class AgentService:
                 image_bytes,
                 history,
             )
+
+            # Keep recommendation wording deterministic across environments.
+            formatted_response_text = llm_result.response_text
+            if llm_result.products and llm_result.intent in {
+                Intent.TEXT_RECOMMENDATION,
+                Intent.IMAGE_SEARCH,
+                Intent.HYBRID_SEARCH,
+            }:
+                formatted_response_text = self._build_structured_product_response_text(
+                    llm_result.products
+                )
+
             print(
                 "[agent.llm] result",
                 {"intent": llm_result.intent.value, "products": len(llm_result.products)},
             )
 
             response = AssistantResponse(
-                response_text=llm_result.response_text,
+                response_text=formatted_response_text,
                 intent=llm_result.intent,
                 products=llm_result.products,
                 cart_actions=llm_result.cart_actions,
@@ -349,17 +361,28 @@ class AgentService:
         products: list[ProductResponse] = [
             result.product.to_response(reason=result.reason) for result in matches
         ]
-        lead_names = ", ".join(product.name for product in products[:3])
-        response_text = (
-            f"Great choice. I found {len(products)} strong options for your request. "
-            f"Top picks: {lead_names}."
-        )
+        response_text = self._build_structured_product_response_text(products)
 
         return AssistantResponse(
             response_text=response_text,
             intent=Intent.TEXT_RECOMMENDATION,
             products=products,
         )
+
+    def _build_structured_product_response_text(self, products: list[ProductResponse]) -> str:
+        if not products:
+            return "I could not find matching products yet."
+
+        lines = ["Here are some strong matches:", ""]
+        for idx, product in enumerate(products, start=1):
+            lines.append(f"{idx}. {product.name}")
+            lines.append("")
+            lines.append(f"Price: ${product.price:.2f}")
+            lines.append("")
+            lines.append(f"Description: {product.description}")
+            lines.append("")
+
+        return "\n".join(lines).strip()
 
     def _build_cart_update_response(self, message: str | None) -> AssistantResponse:
         query = (message or "").strip()

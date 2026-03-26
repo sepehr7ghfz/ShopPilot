@@ -25,6 +25,10 @@ The project is designed as a clean, reviewer-friendly MVP with production-style 
 
 ## System Architecture
 
+Detailed architecture reference:
+
+1. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+
 Request flow:
 
 1. Browser sends user message and optional image to frontend API route
