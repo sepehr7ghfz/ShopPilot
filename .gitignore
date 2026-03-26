@@ -57,3 +57,7 @@ pnpm-debug.log*
 
 # Jupyter
 .ipynb_checkpoints/
+
+AI_LEARNING_KEYWORDS_AND_VIDEO_PROMPT.md
+EC2_DEPLOY_COMMANDS.md
+LLM_CONTINUATION_UPDATE_2026-03-26.md

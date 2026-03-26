@@ -1,70 +1,78 @@
 # ShopPilot
 
-ShopPilot is a multimodal AI shopping assistant MVP for a commerce experience.
+ShopPilot is a multimodal commerce assistant that supports one unified conversation flow for:
 
-It provides one unified assistant interface for:
-- General conversation
-- Text-based product recommendation
-- Image-based product search
-- Hybrid search (text + image)
+1. General chat
+2. Text-based recommendation
+3. Image-based similarity search
+4. Hybrid search using text plus image
 
-The project is local-first, reviewer-friendly, and intentionally scoped for a take-home submission.
+The project is designed as a clean, reviewer-friendly MVP with production-style structure and containerized deployment.
 
-## What ShopPilot Does
+## Highlights
 
-ShopPilot accepts a user message, an uploaded image, or both, then routes internally to the right retrieval path while keeping a single assistant experience.
+1. Single assistant endpoint for all interaction modes
+2. LLM tool orchestration with deterministic fallback retrieval
+3. Semantic text retrieval and image similarity retrieval
+4. Cart-aware assistant responses with UI cart actions
+5. Dockerized backend, frontend, and nginx reverse proxy
 
-Iteration 2 upgrade:
-- OpenAI-backed orchestration for a single assistant agent with tool-calling
-- In-memory session memory for multi-turn continuity
-- Deterministic local retrieval tools still power product ranking
+## Live Deployment
 
-### Supported Use Cases
+1. Deployed on AWS EC2
+2. Public URL: http://35.182.8.63
+3. Current public endpoint is HTTP
 
-1. General conversation
-2. Text recommendation over a local product catalog
-3. Image similarity search over local catalog images
-4. Hybrid recommendation by combining text and image signals
+## System Architecture
 
-## Architecture Overview
+Request flow:
 
-High-level flow:
-1. Frontend sends message and optional image to one backend endpoint.
-2. Backend agent orchestration decides whether to answer directly or call retrieval tools.
-3. Service layer runs one of: text retrieval, image retrieval, hybrid retrieval.
-4. Backend returns a consistent response contract for the UI.
+1. Browser sends user message and optional image to frontend API route
+2. Frontend forwards multipart request to backend unified assistant endpoint
+3. Backend agent chooses response path:
+   1. Direct chat response
+   2. Text retrieval
+   3. Image retrieval
+   4. Hybrid retrieval
+4. Backend returns a consistent response contract
+5. Frontend renders response text, product cards, and cart actions
 
-### Why This Architecture
+Service layout:
 
-- Single assistant endpoint keeps the product experience unified.
-- Thin API routes with service-oriented orchestration keep code maintainable.
-- Local JSON + local files keep setup simple and reproducible.
-- One-agent tool orchestration keeps UX unified while remaining explainable.
-- Deterministic retrieval modules provide predictable, auditable ranking.
-- LLM orchestration gracefully falls back to deterministic routing if unavailable.
+1. API routes for assistant and health
+2. Agent orchestration service for intent and tool routing
+3. Retrieval services for text, image, and hybrid ranking
+4. Shared schemas and utilities for contracts and catalog access
 
-## Technical Stack
+## Tech Stack
 
 Backend:
-- Python 3.11+
-- FastAPI
-- Pydantic
-- OpenAI Python SDK
-- CLIP via Transformers + Torch (for image retrieval)
+
+1. Python 3.11
+2. FastAPI
+3. Pydantic
+4. OpenAI SDK
+5. Sentence Transformers for semantic text embeddings
+6. CLIP stack with Transformers and Torch for image similarity
 
 Frontend:
-- Next.js (App Router)
-- React + TypeScript
-- Custom CSS (no UI framework)
+
+1. Next.js 14 App Router
+2. React 18 and TypeScript
+3. Custom CSS
+
+Infra:
+
+1. Docker and Docker Compose
+2. Nginx reverse proxy
+3. AWS EC2 deployment
 
 Data:
-- Local catalog JSON
-- Local catalog images
 
-Primary dataset source for larger catalog:
-- Hugging Face: `benitomartin/fashion-product-images-small-384x512` (higher-resolution variant)
+1. Local product catalog JSON
+2. Local product image files served via media endpoint
 
-## Project Structure
+## Repository Structure
 
 ```text
 ShopPilot/
@@ -80,193 +88,173 @@ ShopPilot/
       products.json
       images/
     requirements.txt
+    Dockerfile
   frontend/
     src/
       app/
       components/
       lib/
       styles/
-    public/placeholders/
+    public/
     package.json
-    .env.example
-  .gitignore
-  README.md
+    Dockerfile
+  deploy/
+    nginx.conf
+  docker-compose.yml
+  .dockerignore
+  EC2_DEPLOY_COMMANDS.md
 ```
 
-## Local Setup
+## Local Development
 
-### Prerequisites
+Prerequisites:
 
-- Python 3.11+
-- Node.js 18+
-- npm
+1. Python 3.11+
+2. Node.js 18+
+3. npm
 
-### 1) Backend Setup
+Backend setup:
 
 ```bash
-cd /Users/sepehr_ghfz/Desktop/ShopPilot
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r backend/requirements.txt
-```
-
-Optional: generate a larger high-quality catalog with real fashion images:
-
-```bash
-cd /Users/sepehr_ghfz/Desktop/ShopPilot
-source .venv/bin/activate
-python backend/scripts/import_fashion_dataset.py --limit 600
-```
-
-Optional quality filter for sharper images:
-
-```bash
-python backend/scripts/import_fashion_dataset.py --limit 600 --min-width 300 --min-height 300
-```
-
-This command rebuilds:
-- `backend/data/catalog/products.json`
-- `backend/data/catalog/images/`
-
-You can increase `--limit` for a larger catalog.
-
-Run backend:
-
-```bash
-cd /Users/sepehr_ghfz/Desktop/ShopPilot/backend
+cd backend
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-Backend URL: `http://localhost:8000`
-
-### 2) Frontend Setup
+Frontend setup:
 
 ```bash
-cd /Users/sepehr_ghfz/Desktop/ShopPilot/frontend
+cd frontend
 cp .env.example .env.local
 npm install
 npm run dev
 ```
 
-Frontend URL: `http://localhost:3000`
+Local URLs:
+
+1. Frontend: http://localhost:3000
+2. Backend: http://localhost:8000
+3. Health: http://localhost:8000/health
 
 ## Environment Variables
 
-Frontend:
-- `NEXT_PUBLIC_API_BASE_URL` (example in [frontend/.env.example](frontend/.env.example))
+Backend:
 
-Backend (optional, with defaults):
-- `APP_NAME`
-- `APP_VERSION`
-- `DEBUG`
-- `LOG_LEVEL`
-- `API_PREFIX`
-- `OPENAI_API_KEY` (required to enable LLM orchestrator)
-- `OPENAI_MODEL` (default: `gpt-4o-mini`)
-- `USE_LLM_ORCHESTRATOR` (default: `true`)
-- `SESSION_MEMORY_TURNS` (default: `8`)
-- `USE_TEXT_RAG` (default: `true`)
-- `RAG_MODEL_NAME` (default: `sentence-transformers/all-MiniLM-L6-v2`)
+1. OPENAI_API_KEY
+2. OPENAI_MODEL
+3. USE_LLM_ORCHESTRATOR
+4. USE_TEXT_RAG
+5. RAG_MODEL_NAME
+6. SESSION_MEMORY_TURNS
+7. API_PREFIX
+8. LOG_LEVEL
 
-## API Overview
+Frontend runtime:
 
-Base URL: `http://localhost:8000`
+1. BACKEND_API_BASE_URL
+2. BACKEND_REQUEST_TIMEOUT_MS
 
-### Health Endpoint
+Frontend build:
 
-- `GET /health`
+1. NEXT_PUBLIC_MEDIA_BASE_URL
 
-Example:
+## API Contract
 
-```bash
-curl http://localhost:8000/health
-```
+Dedicated API reference:
 
-### Unified Assistant Endpoint
+1. See [docs/AGENT_API.md](docs/AGENT_API.md) for full endpoint documentation, payloads, and response schema.
 
-- `POST /api/assistant/respond`
-- `multipart/form-data`
-- Fields:
-  - `message` (optional string)
-  - `image` (optional file)
-  - `session_id` (optional string)
-- Validation: at least one of `message` or `image` must be provided.
+Unified assistant endpoint:
 
-#### Text-only Request
+1. Method: POST
+2. Path: /api/assistant/respond
+3. Content type: multipart/form-data
+4. Fields:
+   1. message optional
+   2. image optional
+   3. session_id optional
 
-```bash
-curl -X POST http://localhost:8000/api/assistant/respond \
-  -F "message=recommend me a black hoodie for casual wear" \
-  -F "session_id=demo-session"
-```
+Health endpoint:
 
-#### Image-only Request
+1. Method: GET
+2. Path: /health
+
+Example request:
 
 ```bash
 curl -X POST http://localhost:8000/api/assistant/respond \
-  -F "image=@/absolute/path/to/image.jpg" \
-  -F "session_id=demo-session"
+  -F "message=recommend daily wear sneakers" \
+  -F "session_id=demo"
 ```
 
-#### Text + Image Request (Hybrid)
+## Docker Deployment
+
+Start full stack:
 
 ```bash
-curl -X POST http://localhost:8000/api/assistant/respond \
-  -F "message=find similar items but more casual" \
-  -F "image=@/absolute/path/to/image.jpg" \
-  -F "session_id=demo-session"
+docker compose up -d --build
 ```
 
-#### Example Response Shape
+Verify:
 
-```json
-{
-  "response_text": "I found 5 strong options for your request. Top picks: Metro Fleece Hoodie, Core Zip Hoodie, Stride Performance Tee.",
-  "intent": "text_recommendation",
-  "products": [
-    {
-      "id": "hoodie-001",
-      "name": "Metro Fleece Hoodie",
-      "category": "hoodie",
-      "price": 68.0,
-      "description": "Warm fleece-lined hoodie with a relaxed fit for street and casual outfits.",
-      "image_path": "catalog/images/hoodie_metro_fleece_black.jpg",
-      "reason": "category match (hoodie); tag match: casual, black"
-    }
-  ]
-}
+```bash
+docker compose ps
+docker compose logs --tail 120
+curl -sS http://127.0.0.1/
+curl -sS -X POST http://127.0.0.1/api/assistant/respond -F "message=hello" -F "session_id=health-check"
 ```
 
-## MVP Limitations
+## AWS EC2 Notes
 
-- Catalog is local and static (no admin panel, no dynamic sync).
-- Text retrieval is deterministic metadata scoring (no semantic embeddings yet).
-- Image retrieval depends on local CLIP dependencies and local catalog images.
-- No authentication or user account state.
-- No production-grade observability stack yet.
+1. The app is served over HTTP on port 80 through nginx
+2. Security Group requires inbound port 80 and port 22
+3. Use Elastic IP for stable public access
+4. HTTPS is a separate step requiring domain and TLS certificate
 
-## Future Improvements
+## Operational Troubleshooting
 
-- Add semantic text embeddings for stronger recommendation quality.
-- Add product image serving and CDN-ready image URLs.
-- Add conversation persistence and richer session memory.
-- Add lightweight evaluation scripts and benchmark set.
-- Add containerized deployment profile.
+If product images do not appear:
 
-## Deployment Readiness Notes
+1. Verify media path is reachable:
 
-Current structure is deployment-friendly but intentionally local-first.
+```bash
+curl -I http://127.0.0.1/media/catalog/images/hf-15970.jpg
+```
 
-Already in place:
-- Clear API boundaries and schemas
-- Environment-based configuration
-- Frontend-backend separation
-- Service-layer modularity
-- LLM tool orchestration with deterministic fallback
-- Session-level conversational memory
+2. Check nginx and backend logs:
 
-Before production deployment:
-- Add persistent storage and media hosting
-- Add request auth/rate limiting
-- Add structured monitoring and alerting
-- Add CI checks and automated tests
+```bash
+docker compose logs --tail 120 nginx backend
+```
+
+3. Rebuild frontend if stale assets are suspected:
+
+```bash
+docker compose build --no-cache frontend
+docker compose up -d frontend nginx
+```
+
+If host disk fills after many rebuilds:
+
+```bash
+docker image prune -f
+docker builder prune -af
+```
+
+## Security Checklist
+
+1. Never commit secrets to git
+2. Store API keys only in environment files on server
+3. Rotate exposed keys immediately
+4. Restrict SSH access by source IP
+5. Add HTTPS before public production use
+
+## Roadmap
+
+1. Add authentication and per-user persistence
+2. Add monitoring and alerting
+3. Add CI with tests and lint gates
+4. Add domain plus automated TLS
+5. Add object storage or CDN for media at scale
