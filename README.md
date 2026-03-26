@@ -97,7 +97,9 @@ Image delivery path:
 Dataset sourcing note:
 
 1. The catalog/image set is generated and curated for this project workflow
-2. In this project lifecycle, a larger fashion dataset source used for import/enrichment was Hugging Face fashion product images
+2. Source used for import and enrichment: Hugging Face dataset `benitomartin/fashion-product-images-small-384x512`
+3. Data was downloaded from Hugging Face Hub using the project import script at backend/scripts/import_fashion_dataset.py
+4. Imported records were filtered/curated and written into backend/data/catalog/products.json and backend/data/catalog/images/
 
 ## Repository Structure
 
