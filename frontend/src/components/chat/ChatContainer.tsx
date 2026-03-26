@@ -444,7 +444,6 @@ export function ChatContainer(): JSX.Element {
         <section className="chat-panel">
           <header className="chat-panel-header">
             <p>Assistant</p>
-            <span>Single unified endpoint</span>
           </header>
 
           {errorMessage ? <ErrorBanner message={errorMessage} onDismiss={() => setErrorMessage(null)} /> : null}
