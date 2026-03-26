@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, KeyboardEvent, useEffect, useMemo, useState } from "react";
 
 import { ImageUploader } from "@/components/chat/ImageUploader";
 
@@ -42,13 +42,26 @@ export function MessageInput({
       return;
     }
 
-    await onSubmit({
-      message: trimmedMessage || undefined,
-      imageFile: selectedFile,
-    });
-
+    const draftMessage = message;
     setMessage("");
     onFileSelected(null);
+
+    try {
+      await onSubmit({
+        message: trimmedMessage || undefined,
+        imageFile: selectedFile,
+      });
+    } catch {
+      setMessage(draftMessage);
+      onFileSelected(selectedFile);
+    }
+  };
+
+  const handleTextAreaKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>): void => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      event.currentTarget.form?.requestSubmit();
+    }
   };
 
   return (
@@ -65,6 +78,7 @@ export function MessageInput({
           className="message-input-textarea"
           disabled={isLoading}
           onChange={(event) => setMessage(event.target.value)}
+          onKeyDown={handleTextAreaKeyDown}
           placeholder="Ask for recommendations, describe what you need, or combine with an image..."
           rows={3}
           value={message}

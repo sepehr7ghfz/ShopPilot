@@ -14,6 +14,11 @@ The project is local-first, reviewer-friendly, and intentionally scoped for a ta
 
 ShopPilot accepts a user message, an uploaded image, or both, then routes internally to the right retrieval path while keeping a single assistant experience.
 
+Iteration 2 upgrade:
+- OpenAI-backed orchestration for a single assistant agent with tool-calling
+- In-memory session memory for multi-turn continuity
+- Deterministic local retrieval tools still power product ranking
+
 ### Supported Use Cases
 
 1. General conversation
@@ -25,8 +30,8 @@ ShopPilot accepts a user message, an uploaded image, or both, then routes intern
 
 High-level flow:
 1. Frontend sends message and optional image to one backend endpoint.
-2. Backend performs intent routing.
-3. Service layer runs one of: general chat, text retrieval, image retrieval, hybrid retrieval.
+2. Backend agent orchestration decides whether to answer directly or call retrieval tools.
+3. Service layer runs one of: text retrieval, image retrieval, hybrid retrieval.
 4. Backend returns a consistent response contract for the UI.
 
 ### Why This Architecture
@@ -34,7 +39,9 @@ High-level flow:
 - Single assistant endpoint keeps the product experience unified.
 - Thin API routes with service-oriented orchestration keep code maintainable.
 - Local JSON + local files keep setup simple and reproducible.
-- Rule-based routing and deterministic scoring are easy to explain in a take-home context.
+- One-agent tool orchestration keeps UX unified while remaining explainable.
+- Deterministic retrieval modules provide predictable, auditable ranking.
+- LLM orchestration gracefully falls back to deterministic routing if unavailable.
 
 ## Technical Stack
 
@@ -42,6 +49,7 @@ Backend:
 - Python 3.11+
 - FastAPI
 - Pydantic
+- OpenAI Python SDK
 - CLIP via Transformers + Torch (for image retrieval)
 
 Frontend:
@@ -130,6 +138,10 @@ Backend (optional, with defaults):
 - `DEBUG`
 - `LOG_LEVEL`
 - `API_PREFIX`
+- `OPENAI_API_KEY` (required to enable LLM orchestrator)
+- `OPENAI_MODEL` (default: `gpt-4o-mini`)
+- `USE_LLM_ORCHESTRATOR` (default: `true`)
+- `SESSION_MEMORY_TURNS` (default: `8`)
 
 ## API Overview
 
@@ -225,6 +237,8 @@ Already in place:
 - Environment-based configuration
 - Frontend-backend separation
 - Service-layer modularity
+- LLM tool orchestration with deterministic fallback
+- Session-level conversational memory
 
 Before production deployment:
 - Add persistent storage and media hosting

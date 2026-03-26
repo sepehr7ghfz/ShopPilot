@@ -1,5 +1,8 @@
 import { Product } from "@/lib/types";
 
+const DEFAULT_MEDIA_BASE_URL = "http://localhost:8000/media";
+const MEDIA_BASE_URL = process.env.NEXT_PUBLIC_MEDIA_BASE_URL ?? DEFAULT_MEDIA_BASE_URL;
+
 export function formatPrice(price: number): string {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -23,6 +26,12 @@ export function resolveProductImage(product: Product): string {
   if (product.image_path && /^https?:\/\//i.test(product.image_path)) {
     return product.image_path;
   }
+
+  if (product.image_path) {
+    const normalizedPath = product.image_path.replace(/^\/+/, "");
+    return `${MEDIA_BASE_URL}/${normalizedPath}`;
+  }
+
   return "/placeholders/product.svg";
 }
 

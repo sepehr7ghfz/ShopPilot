@@ -2,6 +2,8 @@ fastapi
 uvicorn
 pydantic
 python-multipart
+python-dotenv
+openai
 
 # Local image handling used by image_search/hybrid_search
 pillow

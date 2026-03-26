@@ -52,6 +52,10 @@ export function ChatContainer(): JSX.Element {
     message?: string;
     imageFile?: File | null;
   }): Promise<void> => {
+    console.log("[frontend.chat] handleSend:start", {
+      message: payload.message?.slice(0, 120) ?? "",
+      hasImage: Boolean(payload.imageFile),
+    });
     const imagePreviewUrl = payload.imageFile ? URL.createObjectURL(payload.imageFile) : undefined;
 
     const userMessage: ChatMessage = {
@@ -81,6 +85,10 @@ export function ChatContainer(): JSX.Element {
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
+      console.log("[frontend.chat] handleSend:assistant_received", {
+        intent: assistantResponse.intent,
+        products: assistantResponse.products?.length ?? 0,
+      });
     } catch (error) {
       const fallbackErrorMessage =
         error instanceof Error ? error.message : "Request failed. Please check backend availability and retry.";
@@ -95,9 +103,13 @@ export function ChatContainer(): JSX.Element {
           isError: true,
         },
       ]);
+      console.log("[frontend.chat] handleSend:error", {
+        message: fallbackErrorMessage,
+      });
     } finally {
       setIsLoading(false);
       setSelectedFile(null);
+      console.log("[frontend.chat] handleSend:done");
     }
   };
 
@@ -176,7 +188,7 @@ export function ChatContainer(): JSX.Element {
             {isLoading ? (
               <div className="loading-inline">
                 <LoadingSpinner />
-                <span>Preparing your recommendations...</span>
+                <span>Thinking...</span>
               </div>
             ) : null}
             <MessageInput
