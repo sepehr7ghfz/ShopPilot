@@ -6,12 +6,18 @@ import { ImageUploader } from "@/components/chat/ImageUploader";
 
 interface MessageInputProps {
   isLoading: boolean;
+  selectedFile: File | null;
+  onFileSelected: (file: File | null) => void;
   onSubmit: (payload: { message?: string; imageFile?: File | null }) => Promise<void>;
 }
 
-export function MessageInput({ isLoading, onSubmit }: MessageInputProps): JSX.Element {
+export function MessageInput({
+  isLoading,
+  selectedFile,
+  onFileSelected,
+  onSubmit,
+}: MessageInputProps): JSX.Element {
   const [message, setMessage] = useState("");
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const previewUrl = useMemo(() => {
     if (!selectedFile) {
@@ -42,24 +48,33 @@ export function MessageInput({ isLoading, onSubmit }: MessageInputProps): JSX.El
     });
 
     setMessage("");
-    setSelectedFile(null);
+    onFileSelected(null);
   };
 
   return (
     <form className="message-input" onSubmit={handleSubmit}>
-      <textarea
-        className="message-input-textarea"
-        disabled={isLoading}
-        onChange={(event) => setMessage(event.target.value)}
-        placeholder="Ask for recommendations, chat, or upload an image..."
-        rows={3}
-        value={message}
-      />
+      <div className="message-input-top-row">
+        <label className="message-input-label" htmlFor="assistant-message-input">
+          Message
+        </label>
+        <span className="message-input-helper">Text, image, or both</span>
+      </div>
+      <div className="message-input-textarea-wrap">
+        <textarea
+          id="assistant-message-input"
+          className="message-input-textarea"
+          disabled={isLoading}
+          onChange={(event) => setMessage(event.target.value)}
+          placeholder="Ask for recommendations, describe what you need, or combine with an image..."
+          rows={3}
+          value={message}
+        />
+      </div>
       <div className="message-input-actions">
         <ImageUploader
           selectedFile={selectedFile}
           previewUrl={previewUrl}
-          onFileSelected={setSelectedFile}
+          onFileSelected={onFileSelected}
           disabled={isLoading}
         />
         <button className="message-send-button" disabled={isLoading} type="submit">

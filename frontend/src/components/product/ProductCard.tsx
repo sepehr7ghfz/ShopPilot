@@ -22,14 +22,19 @@ export function ProductCard({ product }: ProductCardProps): JSX.Element {
         />
       </div>
       <div className="product-card-content">
+        <div className="product-card-kicker">ShopPilot Pick</div>
         <div className="product-card-header">
           <h3>{product.name}</h3>
           <span>{formatPrice(product.price)}</span>
         </div>
         <p className="product-card-category">{toDisplayCategory(product.category)}</p>
         <p className="product-card-description">{product.description}</p>
-        {product.reason ? <p className="product-card-reason">Why this match: {product.reason}</p> : null}
       </div>
+      {product.reason ? (
+        <footer className="product-card-footer">
+          <p className="product-card-reason">Why this match: {product.reason}</p>
+        </footer>
+      ) : null}
     </article>
   );
 }

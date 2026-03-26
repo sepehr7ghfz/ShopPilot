@@ -113,8 +113,8 @@ class AgentService:
             logger.warning("assistant.image_search_failed error=%s", str(exc))
             return AssistantResponse(
                 response_text=(
-                    "Image search dependencies are not installed in this environment yet. "
-                    "Install backend image dependencies and retry."
+                    "Image search dependencies are not installed in this environment. "
+                    "Install backend image dependencies and try again."
                 ),
                 intent=Intent.IMAGE_SEARCH,
                 products=[],
@@ -168,8 +168,8 @@ class AgentService:
             logger.warning("assistant.hybrid_search_failed error=%s", str(exc))
             return AssistantResponse(
                 response_text=(
-                    "Hybrid search dependencies are not installed in this environment yet. "
-                    "Install backend image dependencies and retry."
+                    "Hybrid search dependencies are not installed in this environment. "
+                    "Install backend image dependencies and try again."
                 ),
                 intent=Intent.HYBRID_SEARCH,
                 products=[],
