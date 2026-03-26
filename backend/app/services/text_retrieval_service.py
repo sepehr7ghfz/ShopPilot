@@ -75,12 +75,25 @@ class TextRetrievalService:
         self._semantic_disabled = False
 
     def retrieve(self, query: str, limit: int = 5) -> list[TextRetrievalResult]:
+        return self.retrieve_with_constraints(query=query, limit=limit, min_price=None, max_price=None)
+
+    def retrieve_with_constraints(
+        self,
+        query: str,
+        limit: int = 5,
+        min_price: float | None = None,
+        max_price: float | None = None,
+    ) -> list[TextRetrievalResult]:
         query_terms = self._tokenize(query)
         if not query_terms and not query.strip():
             return []
 
         lexical_results: list[TextRetrievalResult] = []
         for product in self.catalog_service.get_all_products():
+            if min_price is not None and product.price < min_price:
+                continue
+            if max_price is not None and product.price > max_price:
+                continue
             result = self._score_product(product=product, query_terms=query_terms)
             if result:
                 lexical_results.append(result)
@@ -97,6 +110,10 @@ class TextRetrievalService:
         for product_id in candidate_ids:
             product = product_by_id.get(product_id)
             if product is None:
+                continue
+            if min_price is not None and product.price < min_price:
+                continue
+            if max_price is not None and product.price > max_price:
                 continue
 
             lexical_result = lexical_by_id.get(product_id)

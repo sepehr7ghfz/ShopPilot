@@ -10,6 +10,7 @@ from app.schemas.assistant import Intent
 from app.schemas.product import ProductResponse
 from app.services.hybrid_retrieval_service import HybridRetrievalService
 from app.services.image_retrieval_service import ImageRetrievalService
+from app.services.query_constraints import in_price_range, parse_price_constraints
 from app.services.session_memory_service import SessionMessage
 from app.services.text_retrieval_service import TextRetrievalService
 
@@ -108,11 +109,27 @@ class LLMAgentService:
             tool_args = self._safe_json_loads(tool_call.function.arguments)
             logger.info("assistant.llm_tool_call tool=%s args=%s", tool_name, tool_args)
 
+            query = str(tool_args.get("query") or message or "").strip()
+            constraints = parse_price_constraints(query or message)
+
             if tool_name == "search_text_products":
                 selected_intent = Intent.TEXT_RECOMMENDATION
-                query = str(tool_args.get("query") or message or "").strip()
-                matches = self.text_retrieval_service.retrieve(query=query, limit=5) if query else []
+                matches = (
+                    self.text_retrieval_service.retrieve_with_constraints(
+                        query=query,
+                        limit=8,
+                        min_price=constraints.min_price,
+                        max_price=constraints.max_price,
+                    )
+                    if query
+                    else []
+                )
                 selected_products = [match.product.to_response(reason=match.reason) for match in matches]
+                selected_products = [
+                    product
+                    for product in selected_products
+                    if in_price_range(product.price, constraints)
+                ][:5]
                 tool_output = {
                     "intent": selected_intent.value,
                     "query": query,
@@ -132,6 +149,11 @@ class LLMAgentService:
                 else:
                     matches = self.image_retrieval_service.retrieve_from_bytes(image_bytes=image_bytes, limit=5)
                     selected_products = [match.product.to_response(reason=match.reason) for match in matches]
+                    selected_products = [
+                        product
+                        for product in selected_products
+                        if in_price_range(product.price, constraints)
+                    ][:5]
                     tool_output = {
                         "intent": selected_intent.value,
                         "count": len(selected_products),
@@ -139,7 +161,6 @@ class LLMAgentService:
                     }
             elif tool_name == "search_hybrid_products":
                 selected_intent = Intent.HYBRID_SEARCH
-                query = str(tool_args.get("query") or message or "").strip()
                 if image_bytes is None:
                     tool_output = {
                         "intent": selected_intent.value,
@@ -150,8 +171,19 @@ class LLMAgentService:
                     }
                     selected_products = []
                 else:
-                    matches = self.hybrid_retrieval_service.retrieve(query=query, image_bytes=image_bytes, limit=5)
+                    matches = self.hybrid_retrieval_service.retrieve_with_constraints(
+                        query=query,
+                        image_bytes=image_bytes,
+                        limit=8,
+                        min_price=constraints.min_price,
+                        max_price=constraints.max_price,
+                    )
                     selected_products = [match.product.to_response(reason=match.reason) for match in matches]
+                    selected_products = [
+                        product
+                        for product in selected_products
+                        if in_price_range(product.price, constraints)
+                    ][:5]
                     tool_output = {
                         "intent": selected_intent.value,
                         "query": query,

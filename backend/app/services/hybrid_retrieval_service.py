@@ -30,8 +30,29 @@ class HybridRetrievalService:
         self.text_weight = text_weight
 
     def retrieve(self, query: str, image_bytes: bytes, limit: int = 5) -> list[HybridRetrievalResult]:
+        return self.retrieve_with_constraints(
+            query=query,
+            image_bytes=image_bytes,
+            limit=limit,
+            min_price=None,
+            max_price=None,
+        )
+
+    def retrieve_with_constraints(
+        self,
+        query: str,
+        image_bytes: bytes,
+        limit: int = 5,
+        min_price: float | None = None,
+        max_price: float | None = None,
+    ) -> list[HybridRetrievalResult]:
         image_results = self.image_retrieval_service.retrieve_from_bytes(image_bytes=image_bytes, limit=limit * 3)
-        text_results = self.text_retrieval_service.retrieve(query=query, limit=limit * 3)
+        text_results = self.text_retrieval_service.retrieve_with_constraints(
+            query=query,
+            limit=limit * 3,
+            min_price=min_price,
+            max_price=max_price,
+        )
 
         if not image_results:
             return []
@@ -50,6 +71,11 @@ class HybridRetrievalService:
 
         fused_results: list[HybridRetrievalResult] = []
         for product_id, product in product_by_id.items():
+            if min_price is not None and product.price < min_price:
+                continue
+            if max_price is not None and product.price > max_price:
+                continue
+
             image_component = image_norm.get(product_id, 0.0)
             text_component = text_norm.get(product_id, 0.0)
             fused_score = self.image_weight * image_component + self.text_weight * text_component

@@ -14,6 +14,7 @@ from app.services.hybrid_retrieval_service import HybridRetrievalService
 from app.services.image_retrieval_service import ImageRetrievalService
 from app.services.intent_router import IntentRouter
 from app.services.llm_agent_service import LLMAgentService
+from app.services.query_constraints import parse_price_constraints
 from app.services.session_memory_service import SessionMemoryService
 from app.services.text_retrieval_service import TextRetrievalService
 
@@ -309,14 +310,26 @@ class AgentService:
                 products=[],
             )
 
-        matches = self.text_retrieval_service.retrieve(query=message, limit=5)
+        constraints = parse_price_constraints(message)
+        matches = self.text_retrieval_service.retrieve_with_constraints(
+            query=message,
+            limit=5,
+            min_price=constraints.min_price,
+            max_price=constraints.max_price,
+        )
         if not matches:
             categories = sorted({product.category for product in self.catalog_service.get_all_products()})
             category_list = ", ".join(categories)
+            budget_hint = ""
+            if constraints.max_price is not None:
+                budget_hint = f" under ${constraints.max_price:.2f}"
+            elif constraints.min_price is not None:
+                budget_hint = f" above ${constraints.min_price:.2f}"
             return AssistantResponse(
                 response_text=(
                     "Thanks. I could not find strong matches for that request yet. "
-                    f"Try mentioning product type, color, or use case. Available categories: {category_list}."
+                    f"Try mentioning product type, color, or use case{budget_hint}. "
+                    f"Available categories: {category_list}."
                 ),
                 intent=Intent.TEXT_RECOMMENDATION,
                 products=[],
@@ -398,10 +411,13 @@ class AgentService:
 
         try:
             image_bytes = await image.read()
-            matches = self.hybrid_retrieval_service.retrieve(
+            constraints = parse_price_constraints(message)
+            matches = self.hybrid_retrieval_service.retrieve_with_constraints(
                 query=message,
                 image_bytes=image_bytes,
                 limit=5,
+                min_price=constraints.min_price,
+                max_price=constraints.max_price,
             )
         except RuntimeError as exc:
             logger.warning("assistant.hybrid_search_failed error=%s", str(exc))
