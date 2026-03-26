@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+pydantic
+python-multipart
+
+# Local image handling used by image_search/hybrid_search
+pillow
+
+# CLIP-based image retrieval stack.
+# Lazy loaded at runtime, so API startup stays healthy without these installed,
+# but image_search and hybrid_search require them to return real results.
+torch
+transformers

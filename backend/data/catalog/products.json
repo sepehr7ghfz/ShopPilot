@@ -1,0 +1,137 @@
+[
+  {
+    "id": "tee-001",
+    "name": "Stride Performance Tee",
+    "category": "t-shirt",
+    "description": "Lightweight moisture-wicking t-shirt designed for running and gym sessions.",
+    "tags": ["sports", "running", "breathable", "quick-dry", "black"],
+    "price": 32.0,
+    "image_path": "catalog/images/tee_stride_performance_black.jpg"
+  },
+  {
+    "id": "tee-002",
+    "name": "Everyday Cotton Tee",
+    "category": "t-shirt",
+    "description": "Soft midweight cotton t-shirt for everyday casual wear.",
+    "tags": ["casual", "cotton", "daily", "white", "minimal"],
+    "price": 24.0,
+    "image_path": "catalog/images/tee_everyday_cotton_white.jpg"
+  },
+  {
+    "id": "tee-003",
+    "name": "Trail Airflow Tee",
+    "category": "t-shirt",
+    "description": "Ventilated training t-shirt with mesh panels for high-intensity workouts.",
+    "tags": ["sports", "training", "gym", "mesh", "blue"],
+    "price": 36.0,
+    "image_path": "catalog/images/tee_trail_airflow_blue.jpg"
+  },
+  {
+    "id": "hoodie-001",
+    "name": "Metro Fleece Hoodie",
+    "category": "hoodie",
+    "description": "Warm fleece-lined hoodie with a relaxed fit for street and casual outfits.",
+    "tags": ["casual", "streetwear", "fleece", "warm", "black"],
+    "price": 68.0,
+    "image_path": "catalog/images/hoodie_metro_fleece_black.jpg"
+  },
+  {
+    "id": "hoodie-002",
+    "name": "Core Zip Hoodie",
+    "category": "hoodie",
+    "description": "Clean full-zip hoodie that layers well for commuting and light travel.",
+    "tags": ["layering", "zip", "travel", "gray", "minimal"],
+    "price": 72.0,
+    "image_path": "catalog/images/hoodie_core_zip_gray.jpg"
+  },
+  {
+    "id": "hoodie-003",
+    "name": "Active Tech Hoodie",
+    "category": "hoodie",
+    "description": "Stretch performance hoodie with breathable fabric for warm-up and cooldown.",
+    "tags": ["sports", "training", "stretch", "breathable", "navy"],
+    "price": 79.0,
+    "image_path": "catalog/images/hoodie_active_tech_navy.jpg"
+  },
+  {
+    "id": "sneaker-001",
+    "name": "Velocity Runner",
+    "category": "sneakers",
+    "description": "Responsive running sneakers with cushioned midsoles for road workouts.",
+    "tags": ["running", "sports", "cushioned", "lightweight", "black"],
+    "price": 118.0,
+    "image_path": "catalog/images/sneaker_velocity_runner_black.jpg"
+  },
+  {
+    "id": "sneaker-002",
+    "name": "City Walk Sneaker",
+    "category": "sneakers",
+    "description": "Comfort-focused everyday sneakers built for all-day city wear.",
+    "tags": ["casual", "daily", "comfort", "walking", "white"],
+    "price": 94.0,
+    "image_path": "catalog/images/sneaker_city_walk_white.jpg"
+  },
+  {
+    "id": "sneaker-003",
+    "name": "Court Flex Sneaker",
+    "category": "sneakers",
+    "description": "Supportive cross-training sneakers with stable grip and flexible forefoot.",
+    "tags": ["training", "gym", "support", "grip", "red"],
+    "price": 109.0,
+    "image_path": "catalog/images/sneaker_court_flex_red.jpg"
+  },
+  {
+    "id": "jacket-001",
+    "name": "Storm Shell Jacket",
+    "category": "jacket",
+    "description": "Water-resistant shell jacket for windy commutes and rainy weather.",
+    "tags": ["outdoor", "rain", "windproof", "travel", "black"],
+    "price": 129.0,
+    "image_path": "catalog/images/jacket_storm_shell_black.jpg"
+  },
+  {
+    "id": "jacket-002",
+    "name": "Puffer Loft Jacket",
+    "category": "jacket",
+    "description": "Insulated puffer jacket that keeps warmth without heavy bulk.",
+    "tags": ["winter", "warm", "insulated", "casual", "olive"],
+    "price": 148.0,
+    "image_path": "catalog/images/jacket_puffer_loft_olive.jpg"
+  },
+  {
+    "id": "jacket-003",
+    "name": "Track Utility Jacket",
+    "category": "jacket",
+    "description": "Light utility jacket with multiple pockets for travel and daily use.",
+    "tags": ["utility", "lightweight", "travel", "commute", "beige"],
+    "price": 112.0,
+    "image_path": "catalog/images/jacket_track_utility_beige.jpg"
+  },
+  {
+    "id": "bag-001",
+    "name": "Nomad Travel Backpack",
+    "category": "backpack",
+    "description": "Spacious 28L backpack with laptop sleeve and organized travel compartments.",
+    "tags": ["travel", "laptop", "carry-on", "organizer", "black"],
+    "price": 89.0,
+    "image_path": "catalog/images/backpack_nomad_travel_black.jpg"
+  },
+  {
+    "id": "bag-002",
+    "name": "Trail Daypack",
+    "category": "backpack",
+    "description": "Durable daypack with breathable back panel for hikes and day trips.",
+    "tags": ["outdoor", "hiking", "lightweight", "daypack", "green"],
+    "price": 76.0,
+    "image_path": "catalog/images/backpack_trail_daypack_green.jpg"
+  },
+  {
+    "id": "bag-003",
+    "name": "Campus Commuter Backpack",
+    "category": "backpack",
+    "description": "Slim commuter backpack for work or school with quick-access pockets.",
+    "tags": ["commute", "school", "laptop", "daily", "navy"],
+    "price": 69.0,
+    "image_path": "catalog/images/backpack_campus_commuter_navy.jpg"
+  }
+]

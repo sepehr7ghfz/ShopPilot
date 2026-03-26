@@ -1,0 +1,1 @@
+"""ShopPilot backend application package."""
