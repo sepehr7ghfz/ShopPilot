@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { DragEvent, useEffect, useMemo, useState } from "react";
 
 import { MessageInput } from "@/components/chat/MessageInput";
 import { MessageList } from "@/components/chat/MessageList";
@@ -73,6 +73,19 @@ export function ChatContainer(): JSX.Element {
 
   const removeCartItem = (productId: string): void => {
     setCartItems((prev) => prev.filter((line) => line.product.id !== productId));
+  };
+
+  const handleFileDrop = (event: DragEvent<HTMLElement>): void => {
+    event.preventDefault();
+    const file = event.dataTransfer.files?.[0] ?? null;
+    if (!file || !file.type.startsWith("image/")) {
+      return;
+    }
+    setSelectedFile(file);
+  };
+
+  const handleDragOver = (event: DragEvent<HTMLElement>): void => {
+    event.preventDefault();
   };
 
   useEffect(() => {
@@ -276,7 +289,7 @@ export function ChatContainer(): JSX.Element {
   };
 
   return (
-    <main className="chat-page">
+    <main className="chat-page" onDrop={handleFileDrop} onDragOver={handleDragOver}>
       <section className="app-shell">
         <aside className="app-sidebar">
           <div className="theme-switch-row">
@@ -298,10 +311,18 @@ export function ChatContainer(): JSX.Element {
 
           <div className="brand-row">
             <div className="brand-avatar" aria-hidden="true">
-              <div className="brand-avatar-core" />
-              <div className="brand-avatar-glow" />
+              <div className="pilot-avatar">
+                <div className="pilot-hat">
+                  <span className="pilot-hat-badge">★</span>
+                </div>
+                <div className="pilot-face">
+                  <span className="pilot-eye pilot-eye-left" />
+                  <span className="pilot-eye pilot-eye-right" />
+                  <span className="pilot-smile">◡</span>
+                </div>
+              </div>
             </div>
-            <div>
+            <div className="brand-title-block">
               <p className="chat-eyebrow">Multimodal Shopping Assistant</p>
               <h1>ShopPilot</h1>
             </div>
@@ -330,7 +351,7 @@ export function ChatContainer(): JSX.Element {
               <ul>
                 <li>"Recommend sneakers for daily wear"</li>
                 <li>"Show me watches under $65"</li>
-                <li>Upload a product photo and add "find similar but cheaper, but in a different color"</li>
+                <li>Upload a photo and add "find similar items, but in a different color"</li>
                 <li>"Add sneaker 1 to my shopping cart"</li>
               </ul>
             ) : null}
@@ -430,7 +451,6 @@ export function ChatContainer(): JSX.Element {
 
           <MessageList
             messages={messages}
-            onImageDropped={setSelectedFile}
             onAddToCart={addToCart}
           />
 

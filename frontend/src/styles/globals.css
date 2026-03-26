@@ -153,28 +153,110 @@ body {
 
 .brand-avatar {
   position: relative;
-  width: 54px;
-  height: 54px;
-  flex: 0 0 54px;
+  width: 66px;
+  height: 66px;
+  flex: 0 0 66px;
 }
 
-.brand-avatar-core {
+.pilot-avatar {
   position: absolute;
   inset: 0;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 24%, #9fcbf8 0%, #4f8fd4 46%, #2e5f95 100%);
-  box-shadow: inset -7px -11px 16px rgba(9, 26, 45, 0.45), inset 7px 8px 14px rgba(235, 245, 255, 0.36), 0 12px 22px rgba(26, 86, 150, 0.35);
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  transition: transform 0.2s ease;
 }
 
-.brand-avatar-glow {
+.pilot-avatar:hover {
+  transform: translateY(-1px) rotate(-3deg);
+}
+
+.pilot-hat {
   position: absolute;
-  width: 22px;
-  height: 22px;
+  top: 9px;
+  left: 8px;
+  width: 50px;
+  height: 20px;
+  border-radius: 12px 12px 6px 6px;
+  background: linear-gradient(180deg, #2e4f73 0%, #1e3650 100%);
+  border: 1px solid rgba(12, 24, 38, 0.26);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pilot-hat::after {
+  content: "";
+  position: absolute;
+  bottom: -5px;
+  left: 10px;
+  width: 30px;
+  height: 8px;
+  border-radius: 0 0 7px 7px;
+  background: #1a2e44;
+}
+
+.pilot-hat-badge {
+  color: #f1c15a;
+  font-size: 0.52rem;
+  line-height: 1;
+}
+
+.pilot-face {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: 25px;
+  bottom: 8px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 36% 26%, #fff7e9 0%, #f8dfb8 100%);
+  border: 1px solid rgba(149, 115, 74, 0.24);
+}
+
+.pilot-eye {
+  position: absolute;
+  top: 9px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  top: 8px;
-  left: 9px;
-  background: rgba(244, 250, 255, 0.75);
-  filter: blur(0.6px);
+  background: #1c2a3a;
+  transform-origin: center;
+  animation: pilot-blink 4.4s infinite;
+}
+
+.pilot-eye-left {
+  left: 10px;
+}
+
+.pilot-eye-right {
+  right: 10px;
+  animation-delay: 0.08s;
+}
+
+.pilot-smile {
+  position: absolute;
+  left: 50%;
+  bottom: 5px;
+  transform: translateX(-50%);
+  font-size: 0.82rem;
+  color: #6f4d2b;
+  font-weight: 700;
+}
+
+@keyframes pilot-blink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  94%,
+  96% {
+    transform: scaleY(0.12);
+  }
+}
+
+.brand-title-block {
+  min-width: 0;
 }
 
 .chat-eyebrow {

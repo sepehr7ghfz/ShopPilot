@@ -40,13 +40,14 @@ export function MessageInput({
       return;
     }
 
-    await onSubmit({
-      message: trimmedMessage || undefined,
-      imageFile: selectedFile,
-    });
-
+    const fileToSend = selectedFile;
     setMessage("");
     onFileSelected(null);
+
+    await onSubmit({
+      message: trimmedMessage || undefined,
+      imageFile: fileToSend,
+    });
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
