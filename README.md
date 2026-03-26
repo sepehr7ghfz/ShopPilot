@@ -61,6 +61,9 @@ Data:
 - Local catalog JSON
 - Local catalog images
 
+Primary dataset source for larger catalog:
+- Hugging Face: `benitomartin/fashion-product-images-small-384x512` (higher-resolution variant)
+
 ## Project Structure
 
 ```text
@@ -107,6 +110,26 @@ source .venv/bin/activate
 pip install -r backend/requirements.txt
 ```
 
+Optional: generate a larger high-quality catalog with real fashion images:
+
+```bash
+cd /Users/sepehr_ghfz/Desktop/ShopPilot
+source .venv/bin/activate
+python backend/scripts/import_fashion_dataset.py --limit 600
+```
+
+Optional quality filter for sharper images:
+
+```bash
+python backend/scripts/import_fashion_dataset.py --limit 600 --min-width 300 --min-height 300
+```
+
+This command rebuilds:
+- `backend/data/catalog/products.json`
+- `backend/data/catalog/images/`
+
+You can increase `--limit` for a larger catalog.
+
 Run backend:
 
 ```bash
@@ -142,6 +165,8 @@ Backend (optional, with defaults):
 - `OPENAI_MODEL` (default: `gpt-4o-mini`)
 - `USE_LLM_ORCHESTRATOR` (default: `true`)
 - `SESSION_MEMORY_TURNS` (default: `8`)
+- `USE_TEXT_RAG` (default: `true`)
+- `RAG_MODEL_NAME` (default: `sentence-transformers/all-MiniLM-L6-v2`)
 
 ## API Overview
 

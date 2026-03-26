@@ -4,6 +4,8 @@ pydantic
 python-multipart
 python-dotenv
 openai
+datasets
+sentence-transformers
 
 # Local image handling used by image_search/hybrid_search
 pillow

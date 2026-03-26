@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -9,7 +10,7 @@ from fastapi import FastAPI
 from fastapi import Request
 from fastapi.staticfiles import StaticFiles
 
-from app.api.routes.assistant import router as assistant_router
+from app.api.routes.assistant import agent_service, router as assistant_router
 from app.api.routes.health import router as health_router
 from app.core.config import settings
 from app.core.logging import configure_logging
@@ -20,6 +21,21 @@ async def lifespan(_: FastAPI):
     configure_logging(settings.log_level)
     logger = logging.getLogger(__name__)
     logger.info("starting %s v%s", settings.app_name, settings.app_version)
+
+    if settings.use_text_rag:
+        try:
+            await asyncio.wait_for(
+                asyncio.to_thread(
+                    agent_service.text_retrieval_service.retrieve,
+                    "running shoes for gym",
+                    1,
+                ),
+                timeout=30,
+            )
+            logger.info("text RAG warm-up completed")
+        except Exception as exc:
+            logger.warning("text RAG warm-up skipped error=%s", str(exc))
+
     yield
     logger.info("shutting down %s", settings.app_name)
 

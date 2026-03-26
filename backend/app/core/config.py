@@ -32,6 +32,8 @@ class Settings:
     openai_model: str = "gpt-4o-mini"
     use_llm_orchestrator: bool = True
     session_memory_turns: int = 8
+    use_text_rag: bool = True
+    rag_model_name: str = "sentence-transformers/all-MiniLM-L6-v2"
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -45,6 +47,8 @@ class Settings:
             openai_model=os.getenv("OPENAI_MODEL", cls.openai_model),
             use_llm_orchestrator=os.getenv("USE_LLM_ORCHESTRATOR", "true").lower() == "true",
             session_memory_turns=int(os.getenv("SESSION_MEMORY_TURNS", str(cls.session_memory_turns))),
+            use_text_rag=os.getenv("USE_TEXT_RAG", "true").lower() == "true",
+            rag_model_name=os.getenv("RAG_MODEL_NAME", cls.rag_model_name),
         )
 
 

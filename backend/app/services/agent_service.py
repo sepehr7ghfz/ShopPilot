@@ -66,7 +66,13 @@ class AgentService:
     def __init__(self, intent_router: IntentRouter | None = None) -> None:
         self.intent_router = intent_router or IntentRouter()
         self.catalog_service = CatalogService()
-        self.text_retrieval_service = TextRetrievalService(self.catalog_service)
+        self.text_retrieval_service = TextRetrievalService(
+            self.catalog_service,
+            semantic_model_name=settings.rag_model_name,
+            semantic_weight=0.65 if settings.use_text_rag else 0.0,
+            lexical_weight=0.35 if settings.use_text_rag else 1.0,
+            min_combined_score=0.22 if settings.use_text_rag else 0.0,
+        )
         self.image_retrieval_service = ImageRetrievalService(self.catalog_service)
         self.hybrid_retrieval_service = HybridRetrievalService(
             text_retrieval_service=self.text_retrieval_service,

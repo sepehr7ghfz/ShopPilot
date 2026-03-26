@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 const DEFAULT_BACKEND_BASE_URL = "http://127.0.0.1:8000";
 const backendBaseUrl = process.env.BACKEND_API_BASE_URL ?? DEFAULT_BACKEND_BASE_URL;
 const backendAssistantUrl = `${backendBaseUrl}/api/assistant/respond`;
+const backendTimeoutMs = Number(process.env.BACKEND_REQUEST_TIMEOUT_MS ?? "45000");
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const startedAt = Date.now();
@@ -37,16 +38,19 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       outboundFormData.append("session_id", sessionId.trim());
     }
 
-    const timeoutMs = 12000;
     const controller = new AbortController();
-    const timeoutHandle = setTimeout(() => controller.abort(), timeoutMs);
+    const timeoutHandle = setTimeout(() => controller.abort(), backendTimeoutMs);
 
-    const response = await fetch(backendAssistantUrl, {
-      method: "POST",
-      body: outboundFormData,
-      signal: controller.signal,
-    });
-    clearTimeout(timeoutHandle);
+    let response: Response;
+    try {
+      response = await fetch(backendAssistantUrl, {
+        method: "POST",
+        body: outboundFormData,
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timeoutHandle);
+    }
 
     const raw = await response.text();
     const elapsedMs = Date.now() - startedAt;
