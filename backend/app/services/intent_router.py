@@ -40,6 +40,16 @@ class IntentRouter:
         "jacket",
         "backpack",
         "bag",
+        "watch",
+        "watches",
+    }
+
+    CART_HINTS = {
+        "cart",
+        "add",
+        "remove",
+        "checkout",
+        "basket",
     }
 
     def route(self, message: str | None, has_image: bool) -> Intent:
@@ -56,6 +66,12 @@ class IntentRouter:
 
         if normalized_message in self.GENERAL_CHAT_HINTS:
             return Intent.GENERAL_CHAT
+
+        if "cart" in terms and terms & {"add", "remove", "delete", "put"}:
+            return Intent.CART_UPDATE
+
+        if ("add" in terms or "put" in terms) and terms & self.SHOPPING_HINTS:
+            return Intent.CART_UPDATE
 
         if terms & self.SHOPPING_HINTS:
             return Intent.TEXT_RECOMMENDATION

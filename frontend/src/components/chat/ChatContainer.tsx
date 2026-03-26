@@ -7,14 +7,21 @@ import { MessageList } from "@/components/chat/MessageList";
 import { ErrorBanner } from "@/components/ui/ErrorBanner";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { sendAssistantMessage } from "@/lib/api";
-import { ChatMessage } from "@/lib/types";
+import { ChatMessage, Product } from "@/lib/types";
+import { formatPrice } from "@/lib/utils";
 import { generateClientId } from "@/lib/utils";
+import { resolveProductImage } from "@/lib/utils";
 
 const initialAssistantMessage: ChatMessage = {
   id: "assistant-welcome",
   role: "assistant",
   text: "Welcome to ShopPilot. Ask for recommendations, upload an image, or combine both for more relevant results.",
 };
+
+interface CartLine {
+  product: Product;
+  quantity: number;
+}
 
 export function ChatContainer(): JSX.Element {
   const [messages, setMessages] = useState<ChatMessage[]>([initialAssistantMessage]);
@@ -24,8 +31,49 @@ export function ChatContainer(): JSX.Element {
   const [showStarters, setShowStarters] = useState(true);
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [cartItems, setCartItems] = useState<CartLine[]>([]);
+  const [cartMinimized, setCartMinimized] = useState(false);
 
   const sessionId = useMemo(() => generateClientId("session"), []);
+
+  const cartQuantity = useMemo(
+    () => cartItems.reduce((sum, line) => sum + line.quantity, 0),
+    [cartItems]
+  );
+
+  const cartTotal = useMemo(
+    () => cartItems.reduce((sum, line) => sum + line.product.price * line.quantity, 0),
+    [cartItems]
+  );
+
+  const addToCart = (product: Product): void => {
+    setCartItems((prev) => {
+      const existing = prev.find((line) => line.product.id === product.id);
+      if (!existing) {
+        return [...prev, { product, quantity: 1 }];
+      }
+
+      return prev.map((line) =>
+        line.product.id === product.id ? { ...line, quantity: line.quantity + 1 } : line
+      );
+    });
+  };
+
+  const decrementCartItem = (productId: string): void => {
+    setCartItems((prev) => {
+      const next = prev
+        .map((line) =>
+          line.product.id === productId ? { ...line, quantity: line.quantity - 1 } : line
+        )
+        .filter((line) => line.quantity > 0);
+
+      return next;
+    });
+  };
+
+  const removeCartItem = (productId: string): void => {
+    setCartItems((prev) => prev.filter((line) => line.product.id !== productId));
+  };
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -153,6 +201,52 @@ export function ChatContainer(): JSX.Element {
         assistantResponse.intent,
         assistantResponse.products
       );
+
+      if (assistantResponse.cart_actions?.length) {
+        setCartItems((prev) => {
+          const next = [...prev];
+          const productsById = new Map((assistantResponse.products ?? []).map((product) => [product.id, product]));
+
+          for (const action of assistantResponse.cart_actions ?? []) {
+            if (action.action === "clear") {
+              next.length = 0;
+              continue;
+            }
+
+            if (action.action === "remove") {
+              for (const id of action.product_ids) {
+                const index = next.findIndex((item) => item.product.id === id);
+                if (index >= 0) {
+                  const updated = { ...next[index], quantity: next[index].quantity - 1 };
+                  if (updated.quantity <= 0) {
+                    next.splice(index, 1);
+                  } else {
+                    next[index] = updated;
+                  }
+                }
+              }
+              continue;
+            }
+
+            if (action.action === "add") {
+              for (const id of action.product_ids) {
+                const product = productsById.get(id);
+                if (!product) {
+                  continue;
+                }
+                const existing = next.find((item) => item.product.id === product.id);
+                if (!existing) {
+                  next.push({ product, quantity: 1 });
+                } else {
+                  existing.quantity += 1;
+                }
+              }
+            }
+          }
+
+          return next;
+        });
+      }
       console.log("[frontend.chat] handleSend:assistant_received", {
         intent: assistantResponse.intent,
         products: assistantResponse.products?.length ?? 0,
@@ -236,10 +330,94 @@ export function ChatContainer(): JSX.Element {
               <ul>
                 <li>"Recommend sneakers for daily wear"</li>
                 <li>"Show me watches under $65"</li>
-                <li>Upload a product photo and add "find similar but cheaper"</li>
+                <li>Upload a product photo and add "find similar but cheaper, but in a different color"</li>
+                <li>"Add sneaker 1 to my shopping cart"</li>
               </ul>
             ) : null}
           </section>
+
+          <section className="cart-panel" aria-label="Shopping cart">
+            <button
+              className="cart-panel-toggle"
+              type="button"
+              onClick={() => setCartMinimized((value) => !value)}
+            >
+              <span>{cartMinimized ? "▸" : "▾"}</span>
+              <span>Shopping Cart</span>
+              <span className="cart-panel-count">{cartQuantity}</span>
+            </button>
+
+            {!cartMinimized ? (
+              cartItems.length ? (
+                <>
+                  <div className="cart-panel-list">
+                    {cartItems.map((item) => (
+                      <div key={item.product.id} className="cart-panel-item">
+                        <img
+                          src={resolveProductImage(item.product)}
+                          alt={item.product.name}
+                          className="cart-panel-item-image"
+                        />
+                        <div className="cart-panel-item-details">
+                          <p>{item.product.name}</p>
+                          <small>{formatPrice(item.product.price)}</small>
+                        </div>
+                        <div className="cart-panel-item-actions">
+                          <button
+                            type="button"
+                            className="cart-qty-btn"
+                            onClick={() => decrementCartItem(item.product.id)}
+                            aria-label={`Decrease quantity for ${item.product.name}`}
+                            title="Decrease"
+                          >
+                            -
+                          </button>
+                          <span className="cart-qty-value">{item.quantity}</span>
+                          <button
+                            type="button"
+                            className="cart-qty-btn"
+                            onClick={() => addToCart(item.product)}
+                            aria-label={`Increase quantity for ${item.product.name}`}
+                            title="Increase"
+                          >
+                            +
+                          </button>
+                          <button
+                            type="button"
+                            className="cart-remove-btn"
+                            onClick={() => removeCartItem(item.product.id)}
+                            aria-label={`Remove ${item.product.name} from cart`}
+                            title="Remove"
+                          >
+                            🗑
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="cart-panel-summary">
+                    <p>
+                      <span>Total</span>
+                      <strong>{formatPrice(cartTotal)}</strong>
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <p className="cart-panel-empty">Cart is empty.</p>
+              )
+            ) : null}
+          </section>
+
+          <div className="sidebar-checkout-dock">
+            <button
+              type="button"
+              className={`cart-checkout-btn ${cartQuantity > 0 ? "is-active" : ""}`}
+              disabled={cartQuantity === 0}
+            >
+              Proceed to checkout
+            </button>
+          </div>
         </aside>
 
         <section className="chat-panel">
@@ -250,7 +428,11 @@ export function ChatContainer(): JSX.Element {
 
           {errorMessage ? <ErrorBanner message={errorMessage} onDismiss={() => setErrorMessage(null)} /> : null}
 
-          <MessageList messages={messages} onImageDropped={setSelectedFile} />
+          <MessageList
+            messages={messages}
+            onImageDropped={setSelectedFile}
+            onAddToCart={addToCart}
+          />
 
           <footer className="chat-footer">
             {isLoading || isAssistantTyping ? (

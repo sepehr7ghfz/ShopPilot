@@ -71,6 +71,8 @@ body {
   background: linear-gradient(180deg, var(--panel-soft) 0%, var(--panel) 100%);
   padding: 1.1rem 1rem 1rem;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .theme-switch-row {
@@ -242,6 +244,173 @@ body {
   gap: 0.3rem;
   color: var(--muted);
   font-size: 0.84rem;
+}
+
+.cart-panel {
+  margin-top: 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel);
+  padding: 0.62rem 0.72rem;
+}
+
+.cart-panel-toggle {
+  border: none;
+  background: transparent;
+  color: var(--text);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.83rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+}
+
+.cart-panel-count {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  min-width: 1.6rem;
+  height: 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.cart-panel-list {
+  margin-top: 0.52rem;
+  display: grid;
+  gap: 0.46rem;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.cart-panel-item {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel-soft);
+  padding: 0.45rem 0.52rem;
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cart-panel-item-image {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  background: var(--panel);
+}
+
+.cart-panel-item-details {
+  min-width: 0;
+}
+
+.cart-panel-item p {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cart-panel-item small {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.cart-panel-item-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.24rem;
+}
+
+.cart-qty-btn,
+.cart-remove-btn {
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--panel);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.cart-qty-btn {
+  width: 1.35rem;
+  height: 1.35rem;
+  line-height: 1;
+  padding: 0;
+}
+
+.cart-qty-value {
+  min-width: 1rem;
+  text-align: center;
+  font-size: 0.74rem;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.cart-remove-btn {
+  width: 1.35rem;
+  height: 1.35rem;
+  line-height: 1;
+  padding: 0;
+  font-size: 0.75rem;
+}
+
+.cart-panel-summary {
+  margin-top: 0.55rem;
+  border-top: 1px dashed var(--border);
+  padding-top: 0.55rem;
+}
+
+.cart-panel-summary p {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8rem;
+}
+
+.cart-panel-summary strong {
+  color: var(--accent);
+  font-size: 0.88rem;
+}
+
+.cart-checkout-btn {
+  margin-top: 0.42rem;
+  width: 100%;
+  border: none;
+  border-radius: 9px;
+  background: linear-gradient(180deg, var(--accent) 0%, var(--accent-strong) 100%);
+  color: #ffffff;
+  padding: 0.44rem 0.62rem;
+  font-weight: 700;
+  font-size: 0.77rem;
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.cart-checkout-btn.is-active {
+  opacity: 1;
+  cursor: pointer;
+}
+
+.sidebar-checkout-dock {
+  margin-top: auto;
+  padding-top: 0.8rem;
+}
+
+.cart-panel-empty {
+  margin: 0.52rem 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
 }
 
 .chat-panel {
@@ -591,6 +760,13 @@ body {
   align-items: baseline;
 }
 
+.product-card-header-actions {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.24rem;
+}
+
 .product-card-header h3 {
   margin: 0;
   font-size: 0.98rem;
@@ -600,6 +776,24 @@ body {
 .product-card-header span {
   color: var(--accent);
   font-weight: 700;
+}
+
+.product-card-add-btn {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+  width: 1.75rem;
+  height: 1.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.product-card-add-btn:hover {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
 }
 
 .product-card-category {

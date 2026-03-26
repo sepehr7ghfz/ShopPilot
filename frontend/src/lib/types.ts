@@ -19,6 +19,13 @@ export interface AssistantResponse {
   response_text: string;
   intent: AssistantIntent;
   products: Product[];
+  cart_actions?: CartAction[];
+}
+
+export interface CartAction {
+  action: "add" | "remove" | "clear";
+  product_ids: string[];
+  note?: string;
 }
 
 export interface SendAssistantMessageInput {

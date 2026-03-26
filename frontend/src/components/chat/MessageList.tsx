@@ -6,6 +6,7 @@ import { ChatMessage } from "@/lib/types";
 interface MessageListProps {
   messages: ChatMessage[];
   onImageDropped: (file: File | null) => void;
+  onAddToCart: (product: NonNullable<ChatMessage["products"]>[number]) => void;
 }
 
 function normalizeAssistantText(text: string): string {
@@ -64,7 +65,7 @@ function AssistantFormattedText({ text }: { text: string }): JSX.Element {
   );
 }
 
-export function MessageList({ messages, onImageDropped }: MessageListProps): JSX.Element {
+export function MessageList({ messages, onImageDropped, onAddToCart }: MessageListProps): JSX.Element {
   const listRef = useRef<HTMLDivElement | null>(null);
   const hasOnlyWelcome = messages.length === 1 && messages[0]?.id === "assistant-welcome";
 
@@ -123,7 +124,7 @@ export function MessageList({ messages, onImageDropped }: MessageListProps): JSX
                   <img src={message.imagePreviewUrl} alt="Uploaded by user" className="message-image-preview" />
                 </div>
               ) : null}
-              {hasProducts ? <ProductGrid products={message.products ?? []} /> : null}
+              {hasProducts ? <ProductGrid products={message.products ?? []} onAddToCart={onAddToCart} /> : null}
             </article>
           </div>
         );

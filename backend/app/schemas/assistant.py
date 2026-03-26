@@ -12,9 +12,23 @@ class Intent(str, Enum):
     TEXT_RECOMMENDATION = "text_recommendation"
     IMAGE_SEARCH = "image_search"
     HYBRID_SEARCH = "hybrid_search"
+    CART_UPDATE = "cart_update"
+
+
+class CartActionType(str, Enum):
+    ADD = "add"
+    REMOVE = "remove"
+    CLEAR = "clear"
+
+
+class CartAction(BaseModel):
+    action: CartActionType
+    product_ids: list[str] = Field(default_factory=list)
+    note: str | None = None
 
 
 class AssistantResponse(BaseModel):
     response_text: str = Field(..., description="Assistant response shown to user")
     intent: Intent
     products: list[ProductResponse] = Field(default_factory=list)
+    cart_actions: list[CartAction] = Field(default_factory=list)

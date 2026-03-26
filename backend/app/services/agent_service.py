@@ -7,7 +7,7 @@ import re
 from fastapi import UploadFile
 
 from app.core.config import settings
-from app.schemas.assistant import AssistantResponse, Intent
+from app.schemas.assistant import AssistantResponse, CartAction, CartActionType, Intent
 from app.schemas.product import ProductResponse
 from app.services.catalog_service import CatalogService
 from app.services.hybrid_retrieval_service import HybridRetrievalService
@@ -180,6 +180,16 @@ class AgentService:
             )
             return response
 
+        if intent == Intent.CART_UPDATE:
+            print("[agent.respond] fallback_cart_update")
+            response = self._build_cart_update_response(message=message)
+            self.session_memory_service.append_turn(
+                session_id=session_id,
+                user_message=normalized_message,
+                assistant_message=response.response_text,
+            )
+            return response
+
         print("[agent.respond] fallback_hybrid")
         response = await self._build_hybrid_search_response(message=message, image=image)
         self.session_memory_service.append_turn(
@@ -228,6 +238,7 @@ class AgentService:
                 response_text=llm_result.response_text,
                 intent=llm_result.intent,
                 products=llm_result.products,
+                cart_actions=llm_result.cart_actions,
             )
             self.session_memory_service.append_turn(
                 session_id=session_id,
@@ -348,6 +359,39 @@ class AgentService:
             response_text=response_text,
             intent=Intent.TEXT_RECOMMENDATION,
             products=products,
+        )
+
+    def _build_cart_update_response(self, message: str | None) -> AssistantResponse:
+        query = (message or "").strip()
+        if not query:
+            return AssistantResponse(
+                response_text="Please tell me what you want to add to your cart.",
+                intent=Intent.CART_UPDATE,
+                products=[],
+                cart_actions=[],
+            )
+
+        matches = self.text_retrieval_service.retrieve(query=query, limit=3)
+        if not matches:
+            return AssistantResponse(
+                response_text="I could not find that product in the catalog yet. Please mention the item name or type.",
+                intent=Intent.CART_UPDATE,
+                products=[],
+                cart_actions=[],
+            )
+
+        selected = matches[0].product.to_response(reason=matches[0].reason)
+        return AssistantResponse(
+            response_text=f"Added {selected.name} to your cart.",
+            intent=Intent.CART_UPDATE,
+            products=[selected],
+            cart_actions=[
+                CartAction(
+                    action=CartActionType.ADD,
+                    product_ids=[selected.id],
+                    note="Added by assistant request.",
+                )
+            ],
         )
 
     async def _build_image_search_response(self, image: UploadFile | None) -> AssistantResponse:

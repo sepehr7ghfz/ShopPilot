@@ -5,6 +5,7 @@ import { Product } from "@/lib/types";
 
 interface ProductGridProps {
   products: Product[];
+  onAddToCart?: (product: Product) => void;
 }
 
 function GridIcon(): JSX.Element {
@@ -31,7 +32,7 @@ function ListIcon(): JSX.Element {
   );
 }
 
-export function ProductGrid({ products }: ProductGridProps): JSX.Element {
+export function ProductGrid({ products, onAddToCart }: ProductGridProps): JSX.Element {
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
 
   if (!products.length) {
@@ -67,7 +68,7 @@ export function ProductGrid({ products }: ProductGridProps): JSX.Element {
       </header>
       <div className={`product-grid ${viewMode === "list" ? "product-grid-list" : ""}`} role="list">
         {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <ProductCard key={product.id} product={product} onAddToCart={onAddToCart} />
         ))}
       </div>
     </section>

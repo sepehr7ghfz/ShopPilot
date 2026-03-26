@@ -6,7 +6,7 @@ import importlib
 from dataclasses import dataclass
 from typing import Any
 
-from app.schemas.assistant import Intent
+from app.schemas.assistant import CartAction, CartActionType, Intent
 from app.schemas.product import ProductResponse
 from app.services.hybrid_retrieval_service import HybridRetrievalService
 from app.services.image_retrieval_service import ImageRetrievalService
@@ -22,6 +22,7 @@ class LLMAgentResult:
     intent: Intent
     response_text: str
     products: list[ProductResponse]
+    cart_actions: list[CartAction]
 
 
 class LLMAgentService:
@@ -97,10 +98,16 @@ class LLMAgentService:
 
         if not tool_calls:
             general_text = (first_message.content or "I am here to help with shopping questions.").strip()
-            return LLMAgentResult(intent=Intent.GENERAL_CHAT, response_text=general_text, products=[])
+            return LLMAgentResult(
+                intent=Intent.GENERAL_CHAT,
+                response_text=general_text,
+                products=[],
+                cart_actions=[],
+            )
 
         selected_intent = Intent.GENERAL_CHAT
         selected_products: list[ProductResponse] = []
+        selected_cart_actions: list[CartAction] = []
 
         tool_message_payload: list[dict[str, Any]] = []
 
@@ -190,6 +197,33 @@ class LLMAgentService:
                         "count": len(selected_products),
                         "products": [self._product_for_tool(product) for product in selected_products],
                     }
+            elif tool_name == "add_products_to_cart":
+                selected_intent = Intent.CART_UPDATE
+                query = str(tool_args.get("query") or message or "").strip()
+                limit = int(tool_args.get("limit") or 1)
+                limit = min(max(limit, 1), 3)
+                matches = self.text_retrieval_service.retrieve(query=query, limit=limit) if query else []
+                selected_products = [match.product.to_response(reason=match.reason) for match in matches]
+                selected_cart_actions = [
+                    CartAction(
+                        action=CartActionType.ADD,
+                        product_ids=[product.id for product in selected_products],
+                        note="Added by assistant request.",
+                    )
+                ] if selected_products else []
+                tool_output = {
+                    "intent": selected_intent.value,
+                    "query": query,
+                    "count": len(selected_products),
+                    "products": [self._product_for_tool(product) for product in selected_products],
+                    "cart_actions": [
+                        {
+                            "action": action.action.value,
+                            "product_ids": action.product_ids,
+                        }
+                        for action in selected_cart_actions
+                    ],
+                }
             else:
                 tool_output = {
                     "intent": Intent.GENERAL_CHAT.value,
@@ -226,6 +260,7 @@ class LLMAgentService:
             intent=selected_intent,
             response_text=response_text,
             products=selected_products,
+            cart_actions=selected_cart_actions,
         )
 
     @staticmethod
@@ -275,6 +310,27 @@ class LLMAgentService:
                             "query": {
                                 "type": "string",
                                 "description": "User's text preference to combine with image signal.",
+                            }
+                        },
+                        "required": ["query"],
+                    },
+                },
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "add_products_to_cart",
+                    "description": "Use when user asks to add one or more products to cart.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "query": {
+                                "type": "string",
+                                "description": "Product description or name to add to cart.",
+                            },
+                            "limit": {
+                                "type": "integer",
+                                "description": "Number of products to add (default 1).",
                             }
                         },
                         "required": ["query"],
