@@ -72,6 +72,33 @@ Data:
 1. Local product catalog JSON
 2. Local product image files served via media endpoint
 
+## Data Used
+
+Primary data used by the app:
+
+1. A curated local product catalog in JSON format at backend/data/catalog/products.json
+2. Local product images at backend/data/catalog/images/
+
+Catalog fields include:
+
+1. id
+2. name
+3. category
+4. description
+5. tags
+6. price
+7. image_path
+
+Image delivery path:
+
+1. Product images are served by backend static media routing under /media
+2. Example image URL pattern: /media/catalog/images/<product-image>.jpg
+
+Dataset sourcing note:
+
+1. The catalog/image set is generated and curated for this project workflow
+2. In this project lifecycle, a larger fashion dataset source used for import/enrichment was Hugging Face fashion product images
+
 ## Repository Structure
 
 ```text
