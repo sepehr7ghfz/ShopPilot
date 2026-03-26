@@ -20,6 +20,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps): JSX.Ele
           className="product-card-image"
           fill
           sizes="(max-width: 768px) 100vw, 300px"
+          unoptimized
         />
       </div>
       <div className="product-card-content">
