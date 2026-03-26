@@ -1,6 +1,6 @@
 import { Product } from "@/lib/types";
 
-const DEFAULT_MEDIA_BASE_URL = "http://localhost:8000/media";
+const DEFAULT_MEDIA_BASE_URL = "/media";
 const MEDIA_BASE_URL = process.env.NEXT_PUBLIC_MEDIA_BASE_URL ?? DEFAULT_MEDIA_BASE_URL;
 
 export function formatPrice(price: number): string {
